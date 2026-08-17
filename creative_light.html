@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>阿哲 · Creative_Light 社交策展名片</title>
+<style>
+:root{--bg:#f6f1e7;
+--surface:#fffdf8;
+--ink:#2b2620;
+--muted:#8a7f6d;
+--accent:#c8861d;
+--accent2:#1f4032;
+--line:#e3d9c4;
+--tag:#f0e6d2;
+--radius:18px;
+--font:-apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif;}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--font);line-height:1.5;-webkit-font-smoothing:antialiased}
+img,svg{max-width:100%}
+a{color:inherit}
+@keyframes fu{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion: no-preference){
+  .exhibit,.hall,.node,.cell,.bub,.block{animation:fu .6s ease both}
+}
+@media (prefers-reduced-motion: reduce){
+  *{animation:none!important;transition:none!important}
+}
+
+
+    .page{max-width:680px;margin:0 auto;padding:24px 18px 80px}
+    .exhibit{margin:30px 0;background:#fffdf8;border:1px solid #e3d9c4;border-radius:18px;padding:22px}
+    .exh-label{font-size:12px;letter-spacing:2px;margin-bottom:14px;font-weight:700}
+    .hero-name{font-size:34px;font-weight:800;color:#2b2620}
+    .hero-title{font-size:16px;color:#c8861d;margin:4px 0 10px;font-weight:700}
+    .hero-slogan{font-size:15px;color:#8a7f6d;line-height:1.7}
+    .hero-vibes{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
+    .hero-vibes span{background:#f0e6d2;color:#2b2620;font-size:12px;padding:5px 11px;border-radius:20px}
+    .c-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+    .c-stat{background:#f0e6d2;border-radius:12px;padding:12px;text-align:center}
+    .c-stat b{display:block;font-size:12px;color:#8a7f6d}
+    .c-stat .num{font-size:24px;font-weight:800;color:#c8861d}
+    .c-stat .unit{font-size:11px;color:#8a7f6d}
+    .c-tl .tl-row{display:grid;grid-template-columns:54px 1fr 1fr;gap:10px;padding:12px 0;border-bottom:1px dashed #e3d9c4}
+    .tl-year{font-weight:800;color:#c8861d}
+    .tl-work i,.tl-life i{font-style:normal;font-size:10px;color:#8a7f6d;display:block;margin-bottom:2px}
+    .c-bento{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+    .c-bento-item{background:#f0e6d2;border-radius:12px;padding:14px}
+    .b-ico{width:34px;height:34px;margin-bottom:8px}
+    .b-title{font-weight:700;color:#2b2620}
+    .b-note{font-size:12px;color:#8a7f6d;margin-top:4px;line-height:1.5}
+    .c-skills{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+    .sk-legend{flex:1;min-width:200px}
+    .sk-row{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px;color:#2b2620}
+    .sk-bar{flex:1;height:7px;background:#e3d9c4;border-radius:4px;overflow:hidden}
+    .sk-bar i{display:block;height:100%;background:#c8861d}
+    .c-testi{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .c-testi-card{background:#f0e6d2;border-radius:12px;padding:14px}
+    .t-text{font-size:14px;color:#2b2620;line-height:1.6}
+    .t-meta{margin-top:8px;display:flex;justify-content:space-between;font-size:11px}
+    .t-who{color:#c8861d;font-weight:700}
+    .t-tag{color:#8a7f6d}
+    .c-contact-row{display:grid;grid-template-columns:64px 1fr;gap:6px 12px;padding:10px 0;border-bottom:1px solid #e3d9c4}
+    .cc-ch{font-weight:700;color:#c8861d}
+    .cc-id{font-size:13px;color:#2b2620}
+    .cc-ice{grid-column:2;font-size:12px;color:#8a7f6d}
+    @media(max-width:480px){.c-stats,.c-bento,.c-testi{grid-template-columns:1fr}}
+    
+</style>
+</head>
+<body>
+<div class="page">
+      <section class="exhibit ">
+  <div class="exh-label" style="color:#1f4032">Exhibit 01 · 身份 · HeroCard</div>
+  <div class="c-hero">
+  <div class="hero-name">阿哲</div>
+  <div class="hero-title">产品设计师 · 周末手作人</div>
+  <div class="hero-slogan">白天画产品，晚上做木工，一个人也把日子过成展览。</div>
+  <div class="hero-vibes"><span>手作爱好者</span><span>咖啡成瘾</span><span>猫奴</span><span>旧物收集</span><span>慢生活</span><span>一人工作室</span></div>
+</div>
+</section>
+      <section class="exhibit ">
+  <div class="exh-label" style="color:#1f4032">Exhibit 02 · 数据 · StatsBoard</div>
+  <div class="c-stats"><div class="c-stat"><b>手作作品</b><span class="num">37</span><span class="unit">件</span></div><div class="c-stat"><b>周末出摊</b><span class="num">12</span><span class="unit">次</span></div><div class="c-stat"><b>种过绿植</b><span class="num">9</span><span class="unit">盆</span></div><div class="c-stat"><b>去过城市</b><span class="num">14</span><span class="unit">个</span></div><div class="c-stat"><b>拍过胶卷</b><span class="num">26</span><span class="unit">卷</span></div><div class="c-stat"><b>凌晨灵感</b><span class="num">2</span><span class="unit">点</span></div></div>
+</section>
+      <section class="exhibit ">
+  <div class="exh-label" style="color:#1f4032">Exhibit 03 · 时间轴 · TimelinePro</div>
+  <div class="c-tl"><div class="tl-row">
+  <div class="tl-year">2021</div>
+  <div class="tl-work"><i>事业</i>开始学木工</div>
+  <div class="tl-life"><i>生活</i>第一张小板凳歪了</div>
+</div><div class="tl-row">
+  <div class="tl-year">2022</div>
+  <div class="tl-work"><i>事业</i>开了一人工作室</div>
+  <div class="tl-life"><i>生活</i>周末接小单</div>
+</div><div class="tl-row">
+  <div class="tl-year">2023</div>
+  <div class="tl-work"><i>事业</i>参加市集</div>
+  <div class="tl-life"><i>生活</i>第一次摆摊</div>
+</div><div class="tl-row">
+  <div class="tl-year">2024</div>
+  <div class="tl-work"><i>事业</i>做了个小工具箱</div>
+  <div class="tl-life"><i>生活</i>自己用的顺手</div>
+</div><div class="tl-row">
+  <div class="tl-year">2025</div>
+  <div class="tl-work"><i>事业</i>开始记录生活</div>
+  <div class="tl-life"><i>生活</i>拍照+写小记</div>
+</div><div class="tl-row">
+  <div class="tl-year">2026</div>
+  <div class="tl-work"><i>事业</i>阿哲的展览</div>
+  <div class="tl-life"><i>生活</i>把日子挂上墙</div>
+</div></div>
+</section>
+      <section class="exhibit ">
+  <div class="exh-label" style="color:#1f4032">Exhibit 04 · 兴趣 · BentoGallery</div>
+  <div class="c-bento"><div class="c-bento-item">
+  <div class="b-ico"><svg viewBox="0 0 24 24" width="100%" height="100%"><rect x="5" y="5" width="14" height="14" rx="3" fill="none" stroke="#c8861d" stroke-width="1.5"/></svg></div>
+  <div class="b-title">手作木工</div>
+  <div class="b-note">把木头变成生活</div>
+</div><div class="c-bento-item">
+  <div class="b-ico"><svg viewBox="0 0 24 24" width="100%" height="100%"><rect x="5" y="5" width="14" height="14" rx="3" fill="none" stroke="#c8861d" stroke-width="1.5"/></svg></div>
+  <div class="b-title">旧物改造</div>
+  <div class="b-note">捡回来的宝贝</div>
+</div><div class="c-bento-item">
+  <div class="b-ico"><svg viewBox="0 0 24 24" width="100%" height="100%"><rect x="5" y="5" width="14" height="14" rx="3" fill="none" stroke="#c8861d" stroke-width="1.5"/></svg></div>
+  <div class="b-title">周末市集</div>
+  <div class="b-note">摆摊交朋友</div>
+</div><div class="c-bento-item">
+  <div class="b-ico"><svg viewBox="0 0 24 24" width="100%" height="100%"><rect x="5" y="5" width="14" height="14" rx="3" fill="none" stroke="#c8861d" stroke-width="1.5"/></svg></div>
+  <div class="b-title">植物角</div>
+  <div class="b-note">阳台小森林</div>
+</div><div class="c-bento-item">
+  <div class="b-ico"><svg viewBox="0 0 24 24" width="100%" height="100%"><rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="#c8861d" stroke-width="1.5"/><line x1="8" y1="5" x2="8" y2="19" stroke="#c8861d"/><line x1="16" y1="5" x2="16" y2="19" stroke="#c8861d"/></svg></div>
+  <div class="b-title">胶片记录</div>
+  <div class="b-note">一按快门就开心</div>
+</div><div class="c-bento-item">
+  <div class="b-ico"><svg viewBox="0 0 24 24" width="100%" height="100%"><path d="M5 9 H17 V15 a4 4 0 0 1 -4 4 H9 a4 4 0 0 1 -4 -4 Z" fill="none" stroke="#c8861d" stroke-width="1.5"/><path d="M17 11 h2 a2 2 0 0 1 0 4 h-2" fill="none" stroke="#c8861d" stroke-width="1.5"/></svg></div>
+  <div class="b-title">咖啡手冲</div>
+  <div class="b-note">每天一杯仪式感</div>
+</div></div>
+</section>
+      <section class="exhibit ">
+  <div class="exh-label" style="color:#1f4032">Exhibit 05 · 技能 · SkillRadar</div>
+  <div class="c-skills">
+  <svg viewBox="0 0 260 260" width="100%" style="max-width:300px"><polygon points="130.0,97.5 153.0,107.0 162.5,130.0 153.0,153.0 130.0,162.5 107.0,153.0 97.5,130.0 107.0,107.0" fill="none" stroke="#e3d9c4"/><polygon points="130.0,65.0 176.0,84.0 195.0,130.0 176.0,176.0 130.0,195.0 84.0,176.0 65.0,130.0 84.0,84.0" fill="none" stroke="#e3d9c4"/><polygon points="130.0,32.5 198.9,61.1 227.5,130.0 198.9,198.9 130.0,227.5 61.1,198.9 32.5,130.0 61.1,61.1" fill="none" stroke="#e3d9c4"/><polygon points="130.0,0.0 221.9,38.1 260.0,130.0 221.9,221.9 130.0,260.0 38.1,221.9 0.0,130.0 38.1,38.1" fill="none" stroke="#e3d9c4"/><line x1="130" y1="130" x2="130.0" y2="0.0" stroke="#e3d9c4"/><line x1="130" y1="130" x2="221.9" y2="38.1" stroke="#e3d9c4"/><line x1="130" y1="130" x2="260.0" y2="130.0" stroke="#e3d9c4"/><line x1="130" y1="130" x2="221.9" y2="221.9" stroke="#e3d9c4"/><line x1="130" y1="130" x2="130.0" y2="260.0" stroke="#e3d9c4"/><line x1="130" y1="130" x2="38.1" y2="221.9" stroke="#e3d9c4"/><line x1="130" y1="130" x2="0.0" y2="130.0" stroke="#e3d9c4"/><line x1="130" y1="130" x2="38.1" y2="38.1" stroke="#e3d9c4"/><polygon points="130.0,23.4 198.9,61.1 234.0,130.0 201.7,201.7 130.0,223.6 49.1,210.9 13.0,130.0 51.9,51.9" fill="#c8861d33" stroke="#c8861d" stroke-width="2"/><circle cx="130.0" cy="23.4" r="3" fill="#c8861d"/><circle cx="198.9" cy="61.1" r="3" fill="#c8861d"/><circle cx="234.0" cy="130.0" r="3" fill="#c8861d"/><circle cx="201.7" cy="201.7" r="3" fill="#c8861d"/><circle cx="130.0" cy="223.6" r="3" fill="#c8861d"/><circle cx="49.1" cy="210.9" r="3" fill="#c8861d"/><circle cx="13.0" cy="130.0" r="3" fill="#c8861d"/><circle cx="51.9" cy="51.9" r="3" fill="#c8861d"/><text x="130.0" y="-16.0" fill="#8a7f6d" font-size="10" text-anchor="middle">木工</text><text x="233.2" y="26.8" fill="#8a7f6d" font-size="10" text-anchor="middle">手绘</text><text x="276.0" y="130.0" fill="#8a7f6d" font-size="10" text-anchor="middle">改造</text><text x="233.2" y="233.2" fill="#8a7f6d" font-size="10" text-anchor="middle">拍照</text><text x="130.0" y="276.0" fill="#8a7f6d" font-size="10" text-anchor="middle">搭配</text><text x="26.8" y="233.2" fill="#8a7f6d" font-size="10" text-anchor="middle">动手</text><text x="-16.0" y="130.0" fill="#8a7f6d" font-size="10" text-anchor="middle">耐心</text><text x="26.8" y="26.8" fill="#8a7f6d" font-size="10" text-anchor="middle">好奇心</text></svg>
+  <div class="sk-legend"><div class="sk-row"><span>木工</span><div class="sk-bar"><i style="width:82%"></i></div></div><div class="sk-row"><span>手绘</span><div class="sk-bar"><i style="width:75%"></i></div></div><div class="sk-row"><span>改造</span><div class="sk-bar"><i style="width:80%"></i></div></div><div class="sk-row"><span>拍照</span><div class="sk-bar"><i style="width:78%"></i></div></div><div class="sk-row"><span>搭配</span><div class="sk-bar"><i style="width:72%"></i></div></div><div class="sk-row"><span>动手</span><div class="sk-bar"><i style="width:88%"></i></div></div><div class="sk-row"><span>耐心</span><div class="sk-bar"><i style="width:90%"></i></div></div><div class="sk-row"><span>好奇心</span><div class="sk-bar"><i style="width:85%"></i></div></div></div>
+</div>
+</section>
+      <section class="exhibit ">
+  <div class="exh-label" style="color:#1f4032">Exhibit 06 · 朋友说 · Testimonial</div>
+  <div class="c-testi"><div class="c-testi-card"><div class="t-text">这个小木马太可爱了！</div><div class="t-meta"><span class="t-who">市集顾客</span><span class="t-tag">暖评</span></div></div><div class="c-testi-card"><div class="t-text">你家阳台像植物园。</div><div class="t-meta"><span class="t-who">朋友</span><span class="t-tag">吐槽</span></div></div><div class="c-testi-card"><div class="t-text">你又捡了什么东西回家？</div><div class="t-meta"><span class="t-who">同事</span><span class="t-tag">吐槽</span></div></div><div class="c-testi-card"><div class="t-text">周末总听见你敲敲打打。</div><div class="t-meta"><span class="t-who">邻居</span><span class="t-tag">暖评</span></div></div><div class="c-testi-card"><div class="t-text">你摆摊比上班积极。</div><div class="t-meta"><span class="t-who">摊友</span><span class="t-tag">吐槽</span></div></div><div class="c-testi-card"><div class="t-text">屋子都快被你塞满了。</div><div class="t-meta"><span class="t-who">家人</span><span class="t-tag">吐槽</span></div></div></div>
+</section>
+      <section class="exhibit ">
+  <div class="exh-label" style="color:#1f4032">Exhibit 07 · 联系 · ContactSocial</div>
+  <div class="c-contact"><div class="c-contact-row">
+  <div class="cc-ch">微信</div>
+  <div class="cc-id">阿哲的小屋</div>
+  <div class="cc-ice">破冰：聊聊你最近做的手作</div>
+</div><div class="c-contact-row">
+  <div class="cc-ch">小红书</div>
+  <div class="cc-id">阿哲手作日记</div>
+  <div class="cc-ice">破冰：分享你的一次改造</div>
+</div><div class="c-contact-row">
+  <div class="cc-ch">邮箱</div>
+  <div class="cc-id">hello@example.com</div>
+  <div class="cc-ice">破冰：一句话介绍你自己</div>
+</div><div class="c-contact-row">
+  <div class="cc-ch">市集</div>
+  <div class="cc-id">周末旧物市集常驻</div>
+  <div class="cc-ice">破冰：来摊上喝杯咖啡</div>
+</div></div>
+</section>
+    </div>
+</body>
+</html>

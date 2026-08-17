@@ -1,0 +1,378 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>社交策展名片 · 生成器</title>
+<style>
+  :root{--ui:#1f2937;--ui2:#374151;--line:#e5e7eb;--bg:#f3f4f6;--ac:#2563eb;--mut:#6b7280}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:-apple-system,'PingFang SC','Microsoft YaHei',sans-serif;background:var(--bg);color:var(--ui);font-size:14px;line-height:1.5}
+  header{padding:14px 18px;background:#fff;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:20}
+  header h1{font-size:16px}
+  header .sub{color:var(--mut);font-size:12px}
+  .themes{display:flex;gap:6px;flex-wrap:wrap}
+  .themes button{border:1px solid var(--line);background:#fff;border-radius:16px;padding:5px 11px;font-size:12px;cursor:pointer;color:var(--ui)}
+  .themes button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+  .actions{margin-left:auto;display:flex;gap:8px}
+  .actions button{border:none;border-radius:8px;padding:8px 14px;font-size:13px;cursor:pointer}
+  .btn-load{background:#eef2ff;color:#3730a3}
+  .btn-dl{background:var(--ac);color:#fff}
+  .wrap{display:flex;gap:0;align-items:stretch;height:calc(100vh - 56px)}
+  .panel{width:380px;max-width:42vw;overflow:auto;background:#fff;border-right:1px solid var(--line);padding:14px}
+  .preview{flex:1;background:#52525b;display:flex;flex-direction:column}
+  .preview iframe{flex:1;width:100%;border:none;background:#fff}
+  details{border:1px solid var(--line);border-radius:10px;margin-bottom:10px;overflow:hidden}
+  details>summary{padding:10px 12px;background:#f9fafb;cursor:pointer;font-weight:700;font-size:13px;display:flex;justify-content:space-between}
+  details[open]>summary{border-bottom:1px solid var(--line)}
+  .body{padding:10px 12px}
+  .fld{margin-bottom:8px}
+  .fld label{display:block;font-size:11px;color:var(--mut);margin-bottom:3px}
+  .fld input,.fld textarea,.fld select{width:100%;border:1px solid var(--line);border-radius:7px;padding:6px 8px;font-size:13px;font-family:inherit}
+  .fld textarea{resize:vertical;min-height:42px}
+  .row{display:grid;gap:6px;margin-bottom:8px;padding:8px;border:1px dashed var(--line);border-radius:8px}
+  .row .rg{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+  .row .rg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+  .row .del{font-size:11px;color:#dc2626;cursor:pointer;text-align:right}
+  .add{font-size:12px;color:var(--ac);cursor:pointer;background:none;border:none;padding:4px}
+  .hint{font-size:11px;color:var(--mut);padding:4px 0}
+</style>
+</head>
+<body>
+<header>
+  <div>
+    <h1>社交策展名片 · 生成器</h1>
+    <div class="sub">填资料 → 选主题 → 下载单文件 H5（零外链·可发微信·可挂任意托管）</div>
+  </div>
+  <div class="themes" id="themes"></div>
+  <div class="actions">
+    <button class="btn-load" id="loadDemo">载入示例</button>
+    <button class="btn-dl" id="download">下载 HTML</button>
+  </div>
+</header>
+<div class="wrap">
+  <div class="panel" id="form"></div>
+  <div class="preview"><iframe id="pv" title="预览"></iframe></div>
+</div>
+
+<script>
+/* ---------- 主题（6 套，架构各异） ---------- */
+const THEMES=[
+ {id:"creative_light",name:"画廊风",cn:"Creative_Light",layout:"A",bg:"#f6f1e7",surface:"#fffdf8",ink:"#2b2620",muted:"#8a7f6d",accent:"#c8861d",accent2:"#1f4032",line:"#e3d9c4",tag:"#f0e6d2",radius:"18px",font:"-apple-system,'PingFang SC','Microsoft YaHei',sans-serif"},
+ {id:"midnight_ink",name:"深夜墨稿",cn:"Midnight_Ink",layout:"B",bg:"#0f1419",surface:"#161d26",ink:"#e8e6df",muted:"#8b94a0",accent:"#c0392b",accent2:"#e8e6df",line:"#26303c",tag:"#1d2630",radius:"10px",font:"'Songti SC',Georgia,'PingFang SC',serif"},
+ {id:"bento_mono",name:"极简模块",cn:"Bento_Mono",layout:"C",bg:"#0e0e0e",surface:"#1a1a1a",ink:"#f5f5f5",muted:"#888",accent:"#00ff9d",accent2:"#ffffff",line:"#2a2a2a",tag:"#222",radius:"22px",font:"'Helvetica Neue','PingFang SC',sans-serif"},
+ {id:"timeline_quest",name:"成长主线",cn:"Timeline_Quest",layout:"D",bg:"#efe6d3",surface:"#fbf6ea",ink:"#3a2e1f",muted:"#9a8869",accent:"#b5651d",accent2:"#3a2e1f",line:"#d8c7a3",tag:"#e7dcc2",radius:"12px",font:"'PingFang SC','Microsoft YaHei',sans-serif"},
+ {id:"chat_me",name:"对话式",cn:"Chat_Me",layout:"E",bg:"#f2f2f2",surface:"#ffffff",ink:"#1a1a1a",muted:"#999",accent:"#07c160",accent2:"#576b95",line:"#e5e5e5",tag:"#eafaf1",radius:"20px",font:"'PingFang SC','Microsoft YaHei',sans-serif"},
+ {id:"gallery_route",name:"展览路线",cn:"Gallery_Route",layout:"F",bg:"#f4f1ee",surface:"#fff",ink:"#33312e",muted:"#a39b92",accent:"#7c93a6",accent2:"#c9a9a6",line:"#e2dbd4",tag:"#ece6df",radius:"16px",font:"'PingFang SC','Microsoft YaHei',sans-serif"}
+];
+let CUR="creative_light";
+
+/* ---------- 图标 ---------- */
+const ICONS={
+ walk:'<path d="M4 20 L10 12 L7 8 L13 8 L11 4 L16 4 L14 10 L18 14 L12 20 Z" fill="{c}"/>',
+ cat:'<circle cx="8" cy="10" r="5" fill="{c}"/><circle cx="16" cy="10" r="5" fill="{c}"/><path d="M6 5 L8 9 M18 5 L16 9" stroke="{c}" stroke-width="1.5"/>',
+ film:'<rect x="3" y="5" width="18" height="14" rx="2" fill="none" stroke="{c}" stroke-width="1.5"/><line x1="8" y1="5" x2="8" y2="19" stroke="{c}"/><line x1="16" y1="5" x2="16" y2="19" stroke="{c}"/>',
+ podcast:'<circle cx="12" cy="13" r="5" fill="none" stroke="{c}" stroke-width="1.5"/><path d="M9 4 L15 4 M12 2 L12 4" stroke="{c}" stroke-width="1.5"/><path d="M10 18 Q12 22 14 18" stroke="{c}" stroke-width="1.5" fill="none"/>',
+ coffee:'<path d="M5 9 H17 V15 a4 4 0 0 1 -4 4 H9 a4 4 0 0 1 -4 -4 Z" fill="none" stroke="{c}" stroke-width="1.5"/><path d="M17 11 h2 a2 2 0 0 1 0 4 h-2" fill="none" stroke="{c}" stroke-width="1.5"/>',
+ game:'<rect x="3" y="8" width="18" height="9" rx="3" fill="none" stroke="{c}" stroke-width="1.5"/><line x1="8" y1="8" x2="8" y2="17" stroke="{c}"/><line x1="16" y1="8" x2="16" y2="17" stroke="{c}"/><circle cx="5.5" cy="12" r="1" fill="{c}"/><circle cx="18.5" cy="12" r="1" fill="{c}"/>',
+ report:'<rect x="4" y="3" width="16" height="18" rx="2" fill="none" stroke="{c}" stroke-width="1.5"/><line x1="8" y1="8" x2="16" y2="8" stroke="{c}"/><line x1="8" y1="12" x2="16" y2="12" stroke="{c}"/><line x1="8" y1="16" x2="13" y2="16" stroke="{c}"/>',
+ json:'<polyline points="9 8 6 12 9 16" fill="none" stroke="{c}" stroke-width="1.5"/><polyline points="15 8 18 12 15 16" fill="none" stroke="{c}" stroke-width="1.5"/>',
+ card:'<rect x="3" y="6" width="18" height="12" rx="2" fill="none" stroke="{c}" stroke-width="1.5"/><line x1="7" y1="10" x2="11" y2="10" stroke="{c}"/><line x1="7" y1="13" x2="14" y2="13" stroke="{c}"/>',
+ local:'<rect x="5" y="11" width="14" height="9" rx="2" fill="none" stroke="{c}" stroke-width="1.5"/><path d="M8 11 V8 a4 4 0 0 1 8 0 V11" fill="none" stroke="{c}" stroke-width="1.5"/>',
+ book:'<path d="M5 4 h11 a2 2 0 0 1 2 2 v14 H7 a2 2 0 0 0 -2 2 Z" fill="none" stroke="{c}" stroke-width="1.5"/><line x1="9" y1="8" x2="15" y2="8" stroke="{c}"/>',
+ social:'<circle cx="6" cy="12" r="2.5" fill="none" stroke="{c}" stroke-width="1.5"/><circle cx="18" cy="6" r="2.5" fill="none" stroke="{c}" stroke-width="1.5"/><circle cx="18" cy="18" r="2.5" fill="none" stroke="{c}" stroke-width="1.5"/><line x1="8" y1="11" x2="16" y2="7" stroke="{c}"/><line x1="8" y1="13" x2="16" y2="17" stroke="{c}"/>',
+ default:'<rect x="5" y="5" width="14" height="14" rx="3" fill="none" stroke="{c}" stroke-width="1.5"/>'
+};
+function svgIcon(kind,color){return '<svg viewBox="0 0 24 24" width="100%" height="100%">'+(ICONS[kind]||ICONS.default).replace(/\{c\}/g,color)+'</svg>';}
+
+/* ---------- 雷达 ---------- */
+function radar(skills,t){
+ const n=skills.length,cx=130,cy=130,R=90;let rings="";
+ for(const rr of [0.25,0.5,0.75,1.0]){
+   let poly=[];for(let i=0;i<n;i++){const a=-Math.PI/2+i*2*Math.PI/n;poly.push((cx+R*rr*Math.cos(a)).toFixed(1)+","+(cy+R*rr*Math.sin(a)).toFixed(1));}
+   rings+='<polygon points="'+poly.join(" ")+'" fill="none" stroke="'+t.line+'"/>';
+ }
+ let axes="";for(let i=0;i<n;i++){const a=-Math.PI/2+i*2*Math.PI/n;axes+='<line x1="'+cx+'" y1="'+cy+'" x2="'+(cx+R*Math.cos(a)).toFixed(1)+'" y2="'+(cy+R*Math.sin(a)).toFixed(1)+'" stroke="'+t.line+'"/>';}
+ let pts=[];for(let i=0;i<n;i++){const a=-Math.PI/2+i*2*Math.PI/n,v=skills[i][1];pts.push([cx+R*v*Math.cos(a),cy+R*v*Math.sin(a)]);}
+ const dpoly=pts.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" ");
+ const data='<polygon points="'+dpoly+'" fill="'+t.accent+'33" stroke="'+t.accent+'" stroke-width="2"/>';
+ const dots=pts.map(p=>'<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3" fill="'+t.accent+'"/>').join("");
+ let labels="";for(let i=0;i<n;i++){const a=-Math.PI/2+i*2*Math.PI/n;const lx=cx+(R+16)*Math.cos(a),ly=cy+(R+16)*Math.sin(a);labels+='<text x="'+lx.toFixed(1)+'" y="'+ly.toFixed(1)+'" fill="'+t.muted+'" font-size="10" text-anchor="middle">'+skills[i][0]+'</text>';}
+ return '<svg viewBox="0 0 260 260" width="100%" style="max-width:300px">'+rings+axes+data+dots+labels+'</svg>';
+}
+
+/* ---------- 七组件内容块 ---------- */
+function hHero(P,t){const v=P.vibes.map(x=>'<span>'+x+'</span>').join('');return '<div class="c-hero"><div class="hero-name">'+P.name+'</div><div class="hero-title">'+P.title+'</div><div class="hero-slogan">'+P.slogan+'</div><div class="hero-vibes">'+v+'</div></div>';}
+function hStats(P,t){return '<div class="c-stats">'+P.stats.map(s=>'<div class="c-stat"><b>'+s[0]+'</b><span class="num">'+s[1]+'</span><span class="unit">'+s[2]+'</span></div>').join('')+'</div>';}
+function hTimeline(P,t){return '<div class="c-tl">'+P.timeline.map(r=>'<div class="tl-row"><div class="tl-year">'+r[0]+'</div><div class="tl-work"><i>事业</i>'+r[1]+'</div><div class="tl-life"><i>生活</i>'+r[2]+'</div></div>').join('')+'</div>';}
+function hBento(P,t){return '<div class="c-bento">'+P.bento.map(b=>'<div class="c-bento-item"><div class="b-ico">'+svgIcon(b[2],t.accent)+'</div><div class="b-title">'+b[0]+'</div><div class="b-note">'+b[1]+'</div></div>').join('')+'</div>';}
+function hSkills(P,t){const lg=P.skills.map(s=>'<div class="sk-row"><span>'+s[0]+'</span><div class="sk-bar"><i style="width:'+Math.round(s[1]*100)+'%"></i></div></div>').join('');return '<div class="c-skills">'+radar(P.skills,t)+'<div class="sk-legend">'+lg+'</div></div>';}
+function hTesti(P,t){return '<div class="c-testi">'+P.testimonials.map(x=>'<div class="c-testi-card"><div class="t-text">'+x[1]+'</div><div class="t-meta"><span class="t-who">'+x[0]+'</span><span class="t-tag">'+x[2]+'</span></div></div>').join('')+'</div>';}
+function hContact(P,t){return '<div class="c-contact">'+P.contacts.map(c=>'<div class="c-contact-row"><div class="cc-ch">'+c[0]+'</div><div class="cc-id">'+c[1]+'</div><div class="cc-ice">'+c[2]+'</div></div>').join('')+'</div>';}
+function section(num,title,inner,t,cls){return '<section class="exhibit '+(cls||'')+'"><div class="exh-label" style="color:'+t.accent2+'">Exhibit '+String(num).padStart(2,'0')+' · '+title+'</div>'+inner+'</section>';}
+function fill(raw,t){for(const k in t){if(typeof t[k]==='string')raw=raw.replace(new RegExp('\\[\\['+k+'\\]\\]','g'),t[k]);}return raw;}
+
+/* ---------- 6 套布局 ---------- */
+function layoutA(P,t){
+ const css=`.page{max-width:680px;margin:0 auto;padding:24px 18px 80px}
+ .exhibit{margin:30px 0;background:[[surface]];border:1px solid [[line]];border-radius:[[radius]];padding:22px}
+ .exh-label{font-size:12px;letter-spacing:2px;margin-bottom:14px;font-weight:700}
+ .hero-name{font-size:34px;font-weight:800;color:[[ink]]}
+ .hero-title{font-size:16px;color:[[accent]];margin:4px 0 10px;font-weight:700}
+ .hero-slogan{font-size:15px;color:[[muted]];line-height:1.7}
+ .hero-vibes{margin-top:14px;display:flex;flex-wrap:wrap;gap:8px}
+ .hero-vibes span{background:[[tag]];color:[[ink]];font-size:12px;padding:5px 11px;border-radius:20px}
+ .c-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+ .c-stat{background:[[tag]];border-radius:12px;padding:12px;text-align:center}
+ .c-stat b{display:block;font-size:12px;color:[[muted]]}
+ .c-stat .num{font-size:24px;font-weight:800;color:[[accent]]}
+ .c-stat .unit{font-size:11px;color:[[muted]]}
+ .c-tl .tl-row{display:grid;grid-template-columns:54px 1fr 1fr;gap:10px;padding:12px 0;border-bottom:1px dashed [[line]]}
+ .tl-year{font-weight:800;color:[[accent]]}
+ .tl-work i,.tl-life i{font-style:normal;font-size:10px;color:[[muted]];display:block;margin-bottom:2px}
+ .c-bento{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+ .c-bento-item{background:[[tag]];border-radius:12px;padding:14px}
+ .b-ico{width:34px;height:34px;margin-bottom:8px}
+ .b-title{font-weight:700;color:[[ink]]}
+ .b-note{font-size:12px;color:[[muted]];margin-top:4px;line-height:1.5}
+ .c-skills{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+ .sk-legend{flex:1;min-width:200px}
+ .sk-row{display:flex;align-items:center;gap:8px;margin:6px 0;font-size:13px;color:[[ink]]}
+ .sk-bar{flex:1;height:7px;background:[[line]];border-radius:4px;overflow:hidden}
+ .sk-bar i{display:block;height:100%;background:[[accent]]}
+ .c-testi{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+ .c-testi-card{background:[[tag]];border-radius:12px;padding:14px}
+ .t-text{font-size:14px;color:[[ink]];line-height:1.6}
+ .t-meta{margin-top:8px;display:flex;justify-content:space-between;font-size:11px}
+ .t-who{color:[[accent]];font-weight:700}.t-tag{color:[[muted]]}
+ .c-contact-row{display:grid;grid-template-columns:64px 1fr;gap:6px 12px;padding:10px 0;border-bottom:1px solid [[line]]}
+ .cc-ch{font-weight:700;color:[[accent]]}.cc-id{font-size:13px;color:[[ink]]}.cc-ice{grid-column:2;font-size:12px;color:[[muted]]}
+ @media(max-width:480px){.c-stats,.c-bento,.c-testi{grid-template-columns:1fr}}`;
+ const body='<div class="page">'+section(1,'身份 · HeroCard',hHero(P,t),t)+section(2,'数据 · StatsBoard',hStats(P,t),t)+section(3,'时间轴 · TimelinePro',hTimeline(P,t),t)+section(4,'兴趣 · BentoGallery',hBento(P,t),t)+section(5,'技能 · SkillRadar',hSkills(P,t),t)+section(6,'朋友说 · Testimonial',hTesti(P,t),t)+section(7,'联系 · ContactSocial',hContact(P,t),t)+'</div>';
+ return [fill(css,t),fill(body,t)];
+}
+function layoutB(P,t){
+ const css=`.wrap{display:flex;gap:0;max-width:960px;margin:0 auto;min-height:100vh}
+ .side{position:sticky;top:0;align-self:flex-start;width:300px;height:100vh;background:[[surface]];border-right:1px solid [[line]];padding:32px 24px;overflow:auto}
+ .main{flex:1;padding:32px 28px}
+ .hero-name{font-size:30px;font-weight:800;color:[[ink]]}
+ .hero-title{font-size:15px;color:[[accent]];margin:6px 0 14px;font-weight:700}
+ .hero-slogan{font-size:14px;color:[[muted]];line-height:1.7}
+ .hero-vibes{margin-top:16px;display:flex;flex-wrap:wrap;gap:7px}
+ .hero-vibes span{background:[[tag]];color:[[muted]];font-size:11px;padding:4px 10px;border-radius:14px}
+ .side .c-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:20px}
+ .c-stat{background:[[tag]];border-radius:8px;padding:9px;text-align:center}
+ .c-stat b{display:block;font-size:10px;color:[[muted]]}.c-stat .num{font-size:20px;font-weight:800;color:[[accent]]}
+ .side .c-contact{margin-top:20px}
+ .c-contact-row{padding:8px 0;border-bottom:1px solid [[line]];font-size:12px}
+ .cc-ch{color:[[accent]];font-weight:700}.cc-id{color:[[ink]]}.cc-ice{color:[[muted]];font-size:11px;margin-top:2px}
+ .block{margin-bottom:34px}
+ .block h3{font-size:13px;letter-spacing:2px;color:[[accent]];border-left:3px solid [[accent]];padding-left:10px;margin-bottom:14px}
+ .c-tl .tl-row{display:grid;grid-template-columns:48px 1fr;gap:10px;padding:10px 0;border-bottom:1px dashed [[line]]}
+ .tl-year{font-weight:800;color:[[accent]]}.tl-work i,.tl-life i{font-style:normal;font-size:10px;color:[[muted]];margin-right:6px}
+ .c-bento{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+ .c-bento-item{background:[[tag]];border-radius:10px;padding:12px}
+ .b-ico{width:30px;height:30px;margin-bottom:6px}.b-title{font-weight:700;color:[[ink]];font-size:14px}.b-note{font-size:11px;color:[[muted]];margin-top:3px}
+ .c-skills{display:flex;gap:16px;flex-wrap:wrap;align-items:center}.sk-legend{flex:1;min-width:180px}
+ .sk-row{display:flex;align-items:center;gap:8px;font-size:12px;color:[[ink]];margin:5px 0}.sk-bar{flex:1;height:6px;background:[[line]];border-radius:3px;overflow:hidden}.sk-bar i{display:block;height:100%;background:[[accent]]}
+ .c-testi{display:grid;grid-template-columns:1fr 1fr;gap:10px}.c-testi-card{background:[[tag]];border-radius:10px;padding:12px}
+ .t-text{font-size:13px;color:[[ink]];line-height:1.5}.t-meta{margin-top:7px;display:flex;justify-content:space-between;font-size:10px}.t-who{color:[[accent]];font-weight:700}.t-tag{color:[[muted]]}
+ @media(max-width:720px){.wrap{flex-direction:column}.side{position:relative;width:auto;height:auto;border-right:none;border-bottom:1px solid [[line]]}}`;
+ const body='<div class="wrap"><aside class="side">'+hHero(P,t)+hStats(P,t)+hContact(P,t)+'</aside><main class="main"><div class="block"><h3>TIMELINE · 双轨</h3>'+hTimeline(P,t)+'</div><div class="block"><h3>BENTO · 兴趣</h3>'+hBento(P,t)+'</div><div class="block"><h3>SKILLS · 雷达</h3>'+hSkills(P,t)+'</div><div class="block"><h3>FRIENDS · 朋友说</h3>'+hTesti(P,t)+'</div></main></div>';
+ return [fill(css,t),fill(body,t)];
+}
+function layoutC(P,t){
+ const css=`.page{max-width:760px;margin:0 auto;padding:20px 14px 70px}
+ .bento{display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:minmax(90px,auto);gap:12px}
+ .cell{background:[[surface]];border:1px solid [[line]];border-radius:[[radius]];padding:16px;overflow:hidden}
+ .cell.hero{grid-column:span 4;background:[[accent]];color:#000}
+ .cell.hero .hero-name{font-size:30px;font-weight:800}.cell.hero .hero-title{color:#000;opacity:.7;font-weight:700;margin:4px 0}.cell.hero .hero-slogan{font-size:14px;opacity:.85;line-height:1.6}
+ .cell.hero .hero-vibes{margin-top:12px;display:flex;flex-wrap:wrap;gap:6px}.cell.hero .hero-vibes span{background:#00000022;color:#000;font-size:11px;padding:4px 9px;border-radius:12px}
+ .cell.stats{grid-column:span 4;display:grid;grid-template-columns:repeat(6,1fr);gap:8px}.cell.stats .c-stat{text-align:center}.cell.stats .c-stat b{display:block;font-size:10px;color:[[muted]]}.cell.stats .c-stat .num{font-size:20px;font-weight:800;color:[[accent]]}.cell.stats .c-stat .unit{font-size:10px;color:[[muted]]}
+ .cell.tl{grid-column:span 2}.cell.bento-g{grid-column:span 2}.cell.skills{grid-column:span 2}.cell.testi{grid-column:span 4;display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.cell.contact{grid-column:span 4}
+ .c-tl .tl-row{display:grid;grid-template-columns:40px 1fr;gap:6px;padding:7px 0;border-bottom:1px dashed [[line]];font-size:12px}.tl-year{font-weight:800;color:[[accent]]}.tl-work i,.tl-life i{font-style:normal;font-size:9px;color:[[muted]];margin-right:4px}
+ .c-bento{display:grid;grid-template-columns:1fr 1fr;gap:8px}.c-bento-item{background:[[tag]];border-radius:10px;padding:10px}.b-ico{width:26px;height:26px;margin-bottom:5px}.b-title{font-weight:700;color:[[ink]];font-size:13px}.b-note{font-size:10px;color:[[muted]]}
+ .c-skills{display:block}.sk-legend .sk-row{display:flex;font-size:11px;color:[[ink]];margin:4px 0}.sk-bar{flex:1;height:6px;background:[[line]];border-radius:3px;overflow:hidden;margin-left:6px}.sk-bar i{display:block;height:100%;background:[[accent]]}
+ .c-testi-card{background:[[tag]];border-radius:10px;padding:10px}.t-text{font-size:12px;color:[[ink]];line-height:1.4}.t-meta{margin-top:6px;font-size:9px;display:flex;justify-content:space-between}.t-who{color:[[accent]];font-weight:700}.t-tag{color:[[muted]]}
+ .c-contact-row{display:grid;grid-template-columns:60px 1fr;gap:4px 10px;padding:7px 0;border-bottom:1px solid [[line]];font-size:12px}.cc-ch{color:[[accent]];font-weight:700}.cc-id{color:[[ink]]}.cc-ice{grid-column:2;color:[[muted]];font-size:10px}
+ @media(max-width:560px){.bento{grid-template-columns:repeat(2,1fr)}.cell.hero,.cell.stats,.cell.testi,.cell.contact{grid-column:span 2}.cell.tl,.cell.bento-g,.cell.skills{grid-column:span 2}.cell.stats{grid-template-columns:repeat(3,1fr)}}`;
+ const testi=P.testimonials.map(x=>'<div class="c-testi-card"><div class="t-text">'+x[1]+'</div><div class="t-meta"><span class="t-who">'+x[0]+'</span><span class="t-tag">'+x[2]+'</span></div></div>').join('');
+ let body='<div class="page"><div class="bento"><div class="cell hero">'+hHero(P,t)+'</div><div class="cell stats">'+hStats(P,t)+'</div><div class="cell tl"><b style="color:[[accent]];font-size:12px">TIMELINE</b>'+hTimeline(P,t)+'</div><div class="cell bento-g"><b style="color:[[accent]];font-size:12px">BENTO</b>'+hBento(P,t)+'</div><div class="cell skills"><b style="color:[[accent]];font-size:12px">SKILLS</b>'+hSkills(P,t)+'</div><div class="cell testi"><b style="color:[[accent]];font-size:12px;grid-column:3">FRIENDS</b>'+testi+'</div><div class="cell contact">'+hContact(P,t)+'</div></div></div>';
+ return [fill(css,t),fill(body,t)];
+}
+function layoutD(P,t){
+ const css=`.page{max-width:720px;margin:0 auto;padding:24px 16px 80px}
+ .spine{position:relative;padding-left:30px}.spine::before{content:"";position:absolute;left:9px;top:0;bottom:0;width:3px;background:[[accent]];border-radius:2px}
+ .node{position:relative;margin:22px 0;background:[[surface]];border:1px solid [[line]];border-radius:[[radius]];padding:18px}.node::before{content:"";position:absolute;left:-26px;top:22px;width:14px;height:14px;background:[[accent]];border:3px solid [[bg]];border-radius:50%}
+ .node-year{font-size:13px;font-weight:800;color:[[accent]];margin-bottom:8px}.node h3{font-size:13px;letter-spacing:1px;color:[[muted]];margin:0 0 10px}
+ .hero-name{font-size:32px;font-weight:800;color:[[ink]]}.hero-title{font-size:15px;color:[[accent]];font-weight:700;margin:4px 0 10px}.hero-slogan{font-size:14px;color:[[muted]];line-height:1.7}.hero-vibes{margin-top:12px;display:flex;flex-wrap:wrap;gap:7px}.hero-vibes span{background:[[tag]];color:[[ink]];font-size:11px;padding:4px 10px;border-radius:14px}
+ .c-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:6px}.c-stat{background:[[tag]];border-radius:10px;padding:10px;text-align:center}.c-stat b{display:block;font-size:10px;color:[[muted]]}.c-stat .num{font-size:22px;font-weight:800;color:[[accent]]}
+ .c-bento{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:6px}.c-bento-item{background:[[tag]];border-radius:10px;padding:11px}.b-ico{width:28px;height:28px;margin-bottom:5px}.b-title{font-weight:700;color:[[ink]];font-size:13px}.b-note{font-size:10px;color:[[muted]]}
+ .c-skills{display:flex;gap:14px;flex-wrap:wrap;align-items:center}.sk-legend{flex:1;min-width:170px}.sk-row{display:flex;align-items:center;gap:6px;font-size:12px;color:[[ink]];margin:4px 0}.sk-bar{flex:1;height:6px;background:[[line]];border-radius:3px;overflow:hidden}.sk-bar i{display:block;height:100%;background:[[accent]]}
+ .c-testi{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:6px}.c-testi-card{background:[[tag]];border-radius:10px;padding:11px}.t-text{font-size:13px;color:[[ink]];line-height:1.5}.t-meta{margin-top:6px;font-size:10px;display:flex;justify-content:space-between}.t-who{color:[[accent]];font-weight:700}.t-tag{color:[[muted]]}
+ .c-contact-row{display:grid;grid-template-columns:60px 1fr;gap:4px 10px;padding:8px 0;border-bottom:1px solid [[line]];font-size:12px}.cc-ch{color:[[accent]];font-weight:700}.cc-id{color:[[ink]]}.cc-ice{grid-column:2;color:[[muted]];font-size:10px}
+ @media(max-width:480px){.c-stats,.c-bento,.c-testi{grid-template-columns:1fr}}`;
+ let nodes='<div class="node">'+hHero(P,t)+'</div>';
+ nodes+='<div class="node"><div class="node-year">数据快照</div><h3>STATSBOARD</h3>'+hStats(P,t)+'</div>';
+ P.timeline.forEach(r=>{nodes+='<div class="node"><div class="node-year">'+r[0]+'</div><div class="tl-work" style="font-size:13px;color:[[ink]];margin:4px 0"><i style="font-style:normal;font-size:10px;color:[[muted]]">事业</i>'+r[1]+'</div><div class="tl-life" style="font-size:13px;color:[[ink]]"><i style="font-style:normal;font-size:10px;color:[[muted]]">生活</i>'+r[2]+'</div></div>';});
+ nodes+='<div class="node"><div class="node-year">兴趣档案</div><h3>BENTOGALLERY</h3>'+hBento(P,t)+'</div>';
+ nodes+='<div class="node"><div class="node-year">能力雷达</div><h3>SKILLRADAR</h3>'+hSkills(P,t)+'</div>';
+ nodes+='<div class="node"><div class="node-year">朋友证言</div><h3>TESTIMONIAL</h3>'+hTesti(P,t)+'</div>';
+ nodes+='<div class="node"><div class="node-year">找我玩</div><h3>CONTACTSOCIAL</h3>'+hContact(P,t)+'</div>';
+ const body='<div class="page"><div class="spine">'+nodes+'</div></div>';
+ return [fill(css,t),fill(body,t)];
+}
+function layoutE(P,t){
+ const css=`.page{max-width:640px;margin:0 auto;padding:20px 14px 80px}
+ .chat{display:flex;flex-direction:column;gap:14px}
+ .bub{max-width:88%;padding:14px 16px;border-radius:18px;font-size:14px;line-height:1.6}
+ .ask{align-self:flex-start;background:[[tag]];color:[[ink]];border-bottom-left-radius:4px}
+ .ans{align-self:flex-end;background:[[accent]];color:#fff;border-bottom-right-radius:4px}
+ .ans .hero-name{font-size:22px;font-weight:800}.ans .hero-title{font-size:13px;opacity:.85;font-weight:700;margin:3px 0}.ans .hero-slogan{font-size:13px;opacity:.92}.ans .hero-vibes{margin-top:10px;display:flex;flex-wrap:wrap;gap:6px}.ans .hero-vibes span{background:#ffffff33;font-size:11px;padding:3px 9px;border-radius:12px}
+ .ans .c-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:8px}.ans .c-stat{background:#ffffff22;text-align:center;border-radius:10px;padding:8px}.ans .c-stat b{display:block;font-size:10px;opacity:.8}.ans .c-stat .num{font-size:19px;font-weight:800}
+ .ans .c-bento{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}.ans .c-bento-item{background:#ffffff22;border-radius:10px;padding:10px}.ans .b-ico{width:26px;height:26px;margin-bottom:4px}.ans .b-title{font-weight:700;font-size:13px}.ans .b-note{font-size:10px;opacity:.85}
+ .ans .c-skills{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-top:6px}.ans .sk-legend{flex:1;min-width:160px}.ans .sk-row{display:flex;font-size:11px;margin:3px 0}.ans .sk-bar{flex:1;height:6px;background:#ffffff33;border-radius:3px;overflow:hidden;margin-left:6px}.ans .sk-bar i{display:block;height:100%;background:#fff}
+ .ans .c-testi{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:6px}.ans .c-testi-card{background:#ffffff1a;border-radius:10px;padding:10px}.ans .t-text{font-size:12px;line-height:1.4}.ans .t-meta{margin-top:6px;font-size:9px;display:flex;justify-content:space-between;opacity:.85}
+ .ans .c-contact-row{padding:7px 0;border-bottom:1px solid #ffffff33;font-size:12px}.ans .cc-ch{font-weight:700}.ans .cc-id{opacity:.95}.ans .cc-ice{font-size:10px;opacity:.8;margin-top:2px}
+ .sys{align-self:center;font-size:11px;color:[[muted]];background:[[tag]];padding:4px 12px;border-radius:12px}
+ @media(max-width:480px){.ans .c-stats,.ans .c-bento,.ans .c-testi{grid-template-columns:1fr}}`;
+ const body='<div class="page"><div class="chat"><div class="sys">你和'+P.name+'的对话</div><div class="bub ask">你是干啥的？给我整张能交朋友的卡片呗。</div><div class="bub ans">'+hHero(P,t)+'</div><div class="bub ask">有点意思。你平时都折腾些啥？</div><div class="bub ans">'+hStats(P,t)+'</div><div class="bub ask">这几年怎么过来的？</div><div class="bub ans">'+hTimeline(P,t)+'</div><div class="bub ask">爱好呢？别光说工作。</div><div class="bub ans">'+hBento(P,t)+'</div><div class="bub ask">你擅长啥？</div><div class="bub ans">'+hSkills(P,t)+'</div><div class="bub ask">朋友怎么评价你？</div><div class="bub ans">'+hTesti(P,t)+'</div><div class="bub ask">那去哪找你耍？</div><div class="bub ans">'+hContact(P,t)+'</div></div></div>';
+ return [fill(css,t),fill(body,t)];
+}
+function layoutF(P,t){
+ const css=`.nav{position:sticky;top:0;z-index:9;background:[[surface]];border-bottom:1px solid [[line]];display:flex;gap:6px;overflow-x:auto;padding:12px 14px}
+ .nav a{text-decoration:none;color:[[ink]];font-size:12px;background:[[tag]];padding:6px 12px;border-radius:16px;white-space:nowrap}
+ .nav a:hover{background:[[accent]];color:#fff}
+ .page{max-width:720px;margin:0 auto;padding:24px 16px 80px}
+ .hall{margin:34px 0;scroll-margin-top:60px}.hall-h{font-size:15px;font-weight:800;color:[[accent2]];margin-bottom:14px;display:flex;align-items:center;gap:8px}.hall-h::before{content:"";width:10px;height:10px;border-radius:50%;background:[[accent]]}
+ .hero-name{font-size:32px;font-weight:800;color:[[ink]]}.hero-title{font-size:15px;color:[[accent]];font-weight:700;margin:4px 0 10px}.hero-slogan{font-size:14px;color:[[muted]];line-height:1.7}.hero-vibes{margin-top:12px;display:flex;flex-wrap:wrap;gap:7px}.hero-vibes span{background:[[tag]];color:[[ink]];font-size:11px;padding:4px 10px;border-radius:14px}
+ .c-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.c-stat{background:[[tag]];border-radius:12px;padding:12px;text-align:center}.c-stat b{display:block;font-size:10px;color:[[muted]]}.c-stat .num{font-size:22px;font-weight:800;color:[[accent]]}
+ .c-tl .tl-row{display:grid;grid-template-columns:48px 1fr 1fr;gap:8px;padding:10px 0;border-bottom:1px dashed [[line]];font-size:13px}.tl-year{font-weight:800;color:[[accent]]}.tl-work i,.tl-life i{font-style:normal;font-size:10px;color:[[muted]];display:block}
+ .c-bento{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.c-bento-item{background:[[tag]];border-radius:12px;padding:13px}.b-ico{width:30px;height:30px;margin-bottom:6px}.b-title{font-weight:700;color:[[ink]]}.b-note{font-size:11px;color:[[muted]];margin-top:3px}
+ .c-skills{display:flex;gap:14px;flex-wrap:wrap;align-items:center}.sk-legend{flex:1;min-width:180px}.sk-row{display:flex;align-items:center;gap:6px;font-size:12px;color:[[ink]];margin:4px 0}.sk-bar{flex:1;height:6px;background:[[line]];border-radius:3px;overflow:hidden}.sk-bar i{display:block;height:100%;background:[[accent]]}
+ .c-testi{display:grid;grid-template-columns:1fr 1fr;gap:10px}.c-testi-card{background:[[tag]];border-radius:12px;padding:13px}.t-text{font-size:13px;color:[[ink]];line-height:1.5}.t-meta{margin-top:7px;font-size:10px;display:flex;justify-content:space-between}.t-who{color:[[accent]];font-weight:700}.t-tag{color:[[muted]]}
+ .c-contact-row{display:grid;grid-template-columns:60px 1fr;gap:4px 10px;padding:9px 0;border-bottom:1px solid [[line]];font-size:12px}.cc-ch{color:[[accent]];font-weight:700}.cc-id{color:[[ink]]}.cc-ice{grid-column:2;color:[[muted]];font-size:10px}
+ @media(max-width:480px){.c-stats,.c-bento,.c-testi{grid-template-columns:1fr}}`;
+ const nav='<div class="nav"><a href="#h1">① 身份</a><a href="#h2">② 数据</a><a href="#h3">③ 时间轴</a><a href="#h4">④ 作品</a><a href="#h5">⑤ 技能</a><a href="#h6">⑥ 朋友</a><a href="#h7">⑦ 联系</a></div>';
+ const body=nav+'<div class="page"><div class="hall" id="h1"><div class="hall-h">1 号厅 · 身份</div>'+hHero(P,t)+'</div><div class="hall" id="h2"><div class="hall-h">2 号厅 · 数据快照</div>'+hStats(P,t)+'</div><div class="hall" id="h3"><div class="hall-h">3 号厅 · 成长时间轴</div>'+hTimeline(P,t)+'</div><div class="hall" id="h4"><div class="hall-h">4 号厅 · 兴趣作品</div>'+hBento(P,t)+'</div><div class="hall" id="h5"><div class="hall-h">5 号厅 · 能力雷达</div>'+hSkills(P,t)+'</div><div class="hall" id="h6"><div class="hall-h">6 号厅 · 朋友证言</div>'+hTesti(P,t)+'</div><div class="hall" id="h7"><div class="hall-h">7 号厅 · 联系策展人</div>'+hContact(P,t)+'</div></div>';
+ return [fill(css,t),fill(body,t)];
+}
+const LAYOUTS={A:layoutA,B:layoutB,C:layoutC,D:layoutD,E:layoutE,F:layoutF};
+
+/* ---------- 组装完整单文件 H5 ---------- */
+function buildHTML(P,themeId){
+ const t=THEMES.find(x=>x.id===themeId);
+ const L=LAYOUTS[t.layout];
+ const r=L(P,t);
+ const base=`
+*{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{background:${t.bg};color:${t.ink};font-family:${t.font};-webkit-text-size-adjust:100%}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .6s ease,transform .6s ease}
+.reveal.in{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none}}
+`;
+ const script=`<script>
+(function(){if(window.matchMedia&&matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.12});
+document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});})();
+<\/script>`;
+ return '<!doctype html><html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>'+P.name+' · 社交策展名片</title><style>'+base+r[0]+'</style></head><body>'+r[1].replace(/class="/g,'class="reveal ')+script+'</body></html>';
+}
+
+/* ---------- 默认示例（虚构人物，仅展示用；使用者替换成自己的资料） ---------- */
+const DEMO={name:"阿哲",title:"产品设计师 · 周末手作人",slogan:"白天画产品，晚上做木工，一个人也把日子过成展览。",
+ vibes:["手作爱好者","咖啡成瘾","猫奴","旧物收集","慢生活","一人工作室"],
+ stats:[["手作作品","37","件"],["周末出摊","12","次"],["种过绿植","9","盆"],["去过城市","14","个"],["拍过胶卷","26","卷"],["凌晨灵感","2","点"]],
+ timeline:[[2021,"开始学木工","第一张小板凳歪了"],[2022,"开了一人工作室","周末接小单"],[2023,"参加市集","第一次摆摊"],[2024,"做了个小工具箱","自己用的顺手"],[2025,"开始记录生活","拍照+写小记"],[2026,"阿哲的展览","把日子挂上墙"]],
+ bento:[["手作木工","把木头变成生活","wood"],["旧物改造","捡回来的宝贝","vintage"],["周末市集","摆摊交朋友","market"],["植物角","阳台小森林","plant"],["胶片记录","一按快门就开心","film"],["咖啡手冲","每天一杯仪式感","coffee"]],
+ skills:[["木工",0.82],["手绘",0.75],["改造",0.80],["拍照",0.78],["搭配",0.72],["动手",0.88],["耐心",0.90],["好奇心",0.85]],
+ testimonials:[["市集顾客","这个小木马太可爱了！","暖评"],["朋友","你家阳台像植物园。","吐槽"],["同事","你又捡了什么东西回家？","吐槽"],["邻居","周末总听见你敲敲打打。","暖评"],["摊友","你摆摊比上班积极。","吐槽"],["家人","屋子都快被你塞满了。","吐槽"]],
+ contacts:[["微信","阿哲的小屋","破冰：聊聊你最近做的手作"],["小红书","阿哲手作日记","破冰：分享你的一次改造"],["邮箱","hello@example.com","破冰：一句话介绍你自己"],["市集","周末旧物市集常驻","破冰：来摊上喝杯咖啡"]]
+};
+let P=JSON.parse(JSON.stringify(DEMO));
+
+/* ---------- 表单渲染 ---------- */
+function el(tag,attrs,html){const e=document.createElement(tag);if(attrs)for(const k in attrs)e[k]=attrs[k];if(html!=null)e.innerHTML=html;return e;}
+function fld(label,val,key){const d=el('div',{className:'fld'});d.appendChild(el('label',null,label));const i=el('input',{value:val||''});i.oninput=()=>{setPath(P,key,i.value);render();};d.appendChild(i);return d;}
+function setPath(o,path,v){const ks=path.split('.');let c=o;for(let i=0;i<ks.length-1;i++)c=c[ks[i]];c[ks[ks.length-1]]=v;}
+function getPath(o,path){return path.split('.').reduce((a,k)=>a[k],o);}
+
+function listBlock(title,arr,cols,makeRow,addFn){
+ const det=el('details',{open:true});det.appendChild(el('summary',null,'<span>'+title+'</span><span style="font-weight:400;color:#6b7280;font-size:11px">'+arr.length+' 项</span>'));
+ const bd=el('div',{className:'body'});
+ arr.forEach((item,idx)=>{bd.appendChild(makeRow(item,idx,arr));});
+ const add=el('button',{className:'add'},'+ 添加一项');add.onclick=()=>{addFn();render();};
+ bd.appendChild(add);det.appendChild(bd);return det;
+}
+function dynRow(cells,onDel){
+ const r=el('div',{className:'row'});cells.forEach(c=>r.appendChild(c));
+ if(onDel){const d=el('div',{className:'del'},'删除');d.onclick=onDel;r.appendChild(d);}
+ return r;
+}
+function txt(v,ph){const i=el('input',{value:v||'',placeholder:ph||''});return i;}
+
+function buildForm(){
+ const f=document.getElementById('form');f.innerHTML='';
+ // 身份
+ let id=el('details',{open:true});id.appendChild(el('summary',null,'<span>① 身份 HeroCard</span>'));
+ let ib=el('div',{className:'body'});
+ ib.appendChild(fld('姓名','',0));ib.lastChild.firstChild.value=P.name;ib.lastChild.firstChild.oninput=()=>{P.name=ib.lastChild.firstChild.value;render();};
+ ib.appendChild(fld('头衔','',0));const t2=ib.lastChild.firstChild;t2.value=P.title;t2.oninput=()=>{P.title=t2.value;render();};
+ ib.appendChild(fld('口号 / slogan','',0));const t3=ib.lastChild.firstChild;t3.value=P.slogan;t3.oninput=()=>{P.slogan=t3.value;render();};
+ ib.appendChild(fld('Vibe 标签（逗号分隔）','',0));const t4=ib.lastChild.firstChild;t4.value=P.vibes.join('，');t4.oninput=()=>{P.vibes=t4.value.split(/[,，]/).map(s=>s.trim()).filter(Boolean);render();};
+ id.appendChild(ib);f.appendChild(id);
+
+ // 数据
+ f.appendChild(listBlock('② 数据 StatsBoard',P.stats,3,(it,idx,arr)=>{
+   const a=txt(it[0],'标签'),b=txt(it[1],'数字'),c=txt(it[2],'单位');
+   [a,b,c].forEach((inp,k)=>inp.oninput=()=>{arr[idx][k]=inp.value;render();});
+   return dynRow([el('div',{className:'rg3'},null).appendChild(a)&&el('div',{className:'rg3'},null),a,b,c].slice(1),()=>{arr.splice(idx,1);render();});
+ },()=>{P.stats.push(['新数据','0','单位']);}));
+
+ // 时间轴
+ f.appendChild(listBlock('③ 时间轴 TimelinePro',P.timeline,3,(it,idx,arr)=>{
+   const a=txt(it[0],'年份'),b=txt(it[1],'事业'),c=txt(it[2],'生活');
+   [a,b,c].forEach((inp,k)=>inp.oninput=()=>{arr[idx][k]=inp.value;render();});
+   return dynRow([a,b,c],()=>{arr.splice(idx,1);render();});
+ },()=>{P.timeline.push([2026,'新事业','新生活']);}));
+
+ // Bento
+ f.appendChild(listBlock('④ 兴趣 BentoGallery',P.bento,3,(it,idx,arr)=>{
+   const a=txt(it[0],'标题'),b=txt(it[1],'一句话心得'),s=el('select',null);['report','json','card','local','book','social','default','walk','cat','film','podcast','coffee','game'].forEach(k=>{const o=el('option',{value:k},k);if(k===it[2])o.selected=true;s.appendChild(o);});
+   a.oninput=()=>{arr[idx][0]=a.value;render();};b.oninput=()=>{arr[idx][1]=b.value;render();};s.onchange=()=>{arr[idx][2]=s.value;render();};
+   return dynRow([a,b,s],()=>{arr.splice(idx,1);render();});
+ },()=>{P.bento.push(['新爱好','一句话心得','cat']);}));
+
+ // 技能
+ f.appendChild(listBlock('⑤ 技能 SkillRadar',P.skills,2,(it,idx,arr)=>{
+   const a=txt(it[0],'技能名'),b=el('input',{value:it[1],type:'number',step:'0.01',min:'0',max:'1'});
+   a.oninput=()=>{arr[idx][0]=a.value;render();};b.oninput=()=>{arr[idx][1]=parseFloat(b.value)||0;render();};
+   return dynRow([a,b],()=>{arr.splice(idx,1);render();});
+ },()=>{P.skills.push(['新技能',0.8]);}));
+
+ // 朋友评价
+ f.appendChild(listBlock('⑥ 朋友说 Testimonial',P.testimonials,3,(it,idx,arr)=>{
+   const a=txt(it[0],'关系'),b=el('textarea',null,it[1]),c=txt(it[2],'标签');
+   a.oninput=()=>{arr[idx][0]=a.value;render();};b.oninput=()=>{arr[idx][1]=b.value;render();};c.oninput=()=>{arr[idx][2]=c.value;render();};
+   return dynRow([a,b,c],()=>{arr[idx]&&arr.splice(idx,1);render();});
+ },()=>{P.testimonials.push(['朋友','一句话评价','暖评']);}));
+
+ // 联系
+ f.appendChild(listBlock('⑦ 联系 ContactSocial',P.contacts,3,(it,idx,arr)=>{
+   const a=txt(it[0],'渠道'),b=txt(it[1],'账号'),c=txt(it[2],'破冰话题');
+   [a,b,c].forEach((inp,k)=>inp.oninput=()=>{arr[idx][k]=inp.value;render();});
+   return dynRow([a,b,c],()=>{arr.splice(idx,1);render();});
+ },()=>{P.contacts.push(['渠道','账号','破冰：']);}));
+}
+
+/* ---------- 渲染（预览 + 下载用） ---------- */
+function render(){const html=buildHTML(P,CUR);document.getElementById('pv').srcdoc=html;window._last=html;}
+function initThemes(){const c=document.getElementById('themes');THEMES.forEach(t=>{const b=el('button',null,t.name);if(t.id===CUR)b.className='on';b.onclick=()=>{CUR=t.id;[...c.children].forEach(x=>x.className='');b.className='on';render();};c.appendChild(b);});}
+document.getElementById('loadDemo').onclick=()=>{P=JSON.parse(JSON.stringify(DEMO));buildForm();render();};
+document.getElementById('download').onclick=()=>{const html=buildHTML(P,CUR);const blob=new Blob([html],{type:'text/html'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=(P.name||'social-card')+'_'+CUR+'.html';a.click();URL.revokeObjectURL(a.href);};
+initThemes();buildForm();render();
+</script>
+</body>
+</html>
