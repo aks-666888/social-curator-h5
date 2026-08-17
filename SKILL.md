@@ -63,4 +63,4 @@ description: 社交策展名片 H5 生成器。输入一个人的资料（简历
 - 对外分发：builder.html 可直接发给用户自生成；或挂 GitHub Pages / 任意静态托管做成在线版
 
 ## 输出
-单文件 `.html`（零外链、移动端适配、prefers-reduced-motion 降级）。本技能为「提效坊」产品矩阵中第一款工作工具型技能。
+单文件 `.html`（零外链、移动端适配、prefers-reduced-motion 降级）。本技能为技能产品矩阵中第一款工作工具型技能。
